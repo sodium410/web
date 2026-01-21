@@ -74,19 +74,26 @@ potentially leading to attacks like Cross-Site Scripting (XSS), data retrieval, 
 Client side: eg: xss:   https://example.com/search?q=shoes&q=<script>alert('hacked')  
 Server side: eg:https://test.com?discount=10&discount=50  //server might use second instead of first or add both and give 60% discount.  
 
-## Prototype POllution:  
-javascript specific vulnerability  
-to prevent: just block __proto__ in the input  
+## Prototype Pollution:  
+javascript specific vulnerability - DOM invader - 
+to prevent: just block __proto__ in the input -- is kind of magic property whose value we define gets auto inherited to all other objects  
 if user controlled input is used in js object modification then attacker can add __prototype__ property to the object which gets inherited by all objects.  
 https://www.netspi.com/blog/technical-blog/web-application-pentesting/ultimate-guide-to-prototype-pollution/  
 server side is more severe and high impact compared to client side pollution  
+identity source and send the payload    
 
 Prototype Pollution = Injecting properties into the base object globally  
 Insecure Deserialization = Injecting or modifying object state during reconstruction  
 
 ## Insecure deserialization  
+ysoserial  unserialize dont deserialize user controlled data burp scanner can identify if any serialized data   
 when app accepts serialized data and deserializes it without validation  
 react2shell payload tested from assetnote  
+java php  data is base64 encoded  
+try modifying serialized objects isAdmin:1 make sure to update string length   
+access_token=0 or password=0  //auth byass on older php due to string defualt is 0 in == operation  
+magic methods that are automatically available during derserailiztion  
+
 
 ## SQL Injection  
 user input placed in backend sql queries without sanitization..  
