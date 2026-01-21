@@ -68,6 +68,7 @@ session identifier doesn’t change after successful login. Ex: cookie value.
 
 ## Parameter tampering:  
 playing with parameter values.. example.. from ?user=standard to ?user=admin  
+
 ## Parameter pollution:  
 adding a duplicate parameter with a new value, an attacker can manipulate the application's logic,  
 potentially leading to attacks like Cross-Site Scripting (XSS), data retrieval, or bypassing security controls.  
@@ -75,15 +76,16 @@ Client side: eg: xss:   https://example.com/search?q=shoes&q=<script>alert('hack
 Server side: eg:https://test.com?discount=10&discount=50  //server might use second instead of first or add both and give 60% discount.  
 
 ## Prototype Pollution:  
-javascript specific vulnerability - DOM invader - 
-to prevent: just block __proto__ in the input -- is kind of magic property whose value we define gets auto inherited to all other objects  
+javascript specific vulnerability - DOM invader -  
+to prevent: Filter out __proto__, constructor, and prototype keys from user input before merging  
 if user controlled input is used in js object modification then attacker can add __prototype__ property to the object which gets inherited by all objects.  
 https://www.netspi.com/blog/technical-blog/web-application-pentesting/ultimate-guide-to-prototype-pollution/  
 server side is more severe and high impact compared to client side pollution  
 identity source and send the payload    
-
+often a result of research and known vuln  
 Prototype Pollution = Injecting properties into the base object globally  
 Insecure Deserialization = Injecting or modifying object state during reconstruction  
+{"__proto__":{"isAdmin":true}}  
 
 ## Insecure deserialization  
 ysoserial  unserialize dont deserialize user controlled data burp scanner can identify if any serialized data   
