@@ -124,6 +124,34 @@ how to store < its xml tag, using entity &lt; predefined..
 user controller input gets procesed by template engine without validation as template code  
 {{7*7}}  
 
+## HTTP Request Smuggling  
+not a vuln of web app instead how the fron end(reverse proxy) and backend(web server) processes http requests.  
+problem with how http 1.1 defines start and end of each http request..  
+http pipelining -- 2 gets in same request and 2 responses in same response  ex: 2 gets will results in 2 get results  
+multiple variaitons, common is cl.te and te.cl  
+cl.te  -- front end uses cl and back end uses tl.  
+how to test?  
+**basic things to know**..
+\r\n -- end of line  
+\r\n seperates headers and request body  
+two \r\n\r\n  - after 0 of te to refer end of chunks  - just 0\r\n timesout -- as fe/be keeps waiting   
+update content-length good to keep disabled on repeater however ok for cl.te but must disab for te.cl  
+get request and post requests - last \r\n ex: user=test\r\n can leave at user=test without \r\n doesnt matter much as long as cl is right - thats where content ends  
+rfc recommedation when both cl and te are present fe should ignore cl 
+1. send a long content-length request  -- observe the timeout in mms  -- fe timesoutm just cl present to it picks cl  
+2. send a low content-lengh request  -- observer the response -- should be quicker as fe usually accept low cl treating end of content  
+3. send a request with high cl and correct te --- if timeout then fe/be is using cl, if no timeout because of correct te then both fe and te depend on te - good
+   this proves both fe and be are ignoring high cl value  
+5. send correct cl and wrong te --- this case since fe is using te -- should timeout
+6. To find where the timeout is - observe the delay in responses
+if both fe and be are using te -- then cl.te and te.cl are mostly not exploitable
+but other variations such as te.te and crlf request splitting still can exist  
+
+once we know which is using which - can use timeout to identify issue and use the burp academy to run exploitS  
+mainly hide the /admin or 403 requests in the request  
+when be is poisened with POST to / -- then the next get to / should response with contents of cached hidden request but the request to be crafted carefully  
+considering the \r\n -- that already gets added by the cache of be or te..  
+
 API specific:  
 ## BOLA(broken object level authorization)  
 API security verion of IDOR, same as IDOR fetch or update objects we shouldn’t be allowed to.  
